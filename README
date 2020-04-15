@@ -1,0 +1,22 @@
+matanhalfon, lioraryepaz
+===============================================================================
+Lior Paz, ID 206240996, lior.paz1@mail.huji.ac.il
+Matan Halfon, ID 205680648, matan.halfon@mail.huji.ac.il
+===============================================================================
+
+                           Project 5 - Computer Architecture
+                           ---------------------------------
+  
+
+Submitted Files
+---------------
+README - This file.
+ExtendedAlu.hdl - ALU that multiplies and shifts
+CpuMul.hdl - CPU with extended ALU
+CPU.hdl - Central Processing Unit
+Memory.hdl - RAM!6K plus screen and keyboard memory
+Computer.hdl - CPU plus Memory plus ROM
+
+Remarks
+-------
+* We actually built a computerrr!!!!!!

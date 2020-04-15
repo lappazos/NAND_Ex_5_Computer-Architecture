@@ -1,0 +1,53 @@
+/**
+* This chip is an extension of the book CPU by using the extended ALU.
+* More specificly if instruction[15]==0 or (instruction[14] and instruction[13] equals 1)
+* the CpuMul behave exactly as the book CPU.
+* While if it is C instruction and instruction[13] == 0 the output will be D*A/M 
+* (according to instruction[12]).
+* Moreover, if it is c instruction and instruction[14] == 0 it will behave as follows:
+*
+* instruction:  | 12 | 11 | 10 |
+* _____________________________
+* shift left D  | 0  | 1  | 1  |
+* shift left A  | 0  | 1  | 0  |
+* shift left M  | 1  | 1  | 0  |
+* shift right D | 0  | 0  | 1  |
+* shift right A | 0  | 0  | 0  |
+* shift right M | 1  | 0  | 0  |
+**/
+
+CHIP CpuMul{
+
+    IN  inM[16],         // M value input  (M = contents of RAM[A])
+        instruction[16], // Instruction for execution
+        reset;           // Signals whether to re-start the current
+                         // program (reset=1) or continue executing
+                         // the current program (reset=0).
+
+    OUT outM[16],        // M value output
+        writeM,          // Write into M? 
+        addressM[15],    // Address in data memory (of M)
+        pc[15];          // address of next instruction
+
+     PARTS:
+	 
+	 
+	Mux16(a=instruction,b=ALUOutput,sel=instruction[15],out=ARegisterInput);
+	
+	Not(in=instruction[15],out=not15);
+	Or(a=not15,b=instruction[5],out=ARegisterControl); // A Register - only want to load incase d1 is 1 and in A-Instruction
+	ARegister(in=ARegisterInput,load=ARegisterControl,out=ARegisterOut,out[0..14]=addressM);
+	
+	
+	And(a=instruction[4],b=instruction[15],out=DRegisterControl); // check if in c-instruction
+	DRegister(in=ALUOutput,load=DRegisterControl,out=DRegisterOut);
+	
+	Mux16(a=ARegisterOut,b=inM,sel=instruction[12],out=ALUARegisterInput);
+	ExtendAlu(x=DRegisterOut,y=ALUARegisterInput,instruction=instruction[6..14],out=outM,out=ALUOutput,ng=ALUNeg,zr=ALUZr);
+	
+	Mux(a=instruction[0],b=instruction[2],sel=ALUNeg,out=sign); // JUMP Determine
+	Mux(a=sign,b=instruction[1],sel=ALUZr,out=jump);// JUMP Determine
+	And(a=instruction[15],b=jump,out=pcL); // check if in c-instruction
+	PC(in=ARegisterOut,reset=reset,load=pcL,inc=true,out[0..14]=pc);
+	And(a=instruction[3],b=instruction[15],out=writeM);// check if in c-instruction
+}
